@@ -1,0 +1,6 @@
+
+# ignore IDE
+.idea/
+
+# ignore cmake building
+cmake-build-debug/
