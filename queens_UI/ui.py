@@ -17,7 +17,7 @@ class QueensUI(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Navigation")
+        self.setWindowTitle("Queens")
         self.setFixedSize(1200, 700)
 
         # main layout and main widget
@@ -43,7 +43,7 @@ class QueensUI(QtWidgets.QMainWindow):
         if name == "n":
         # QLineEdit widget
             int_validator = QIntValidator()
-            int_validator.setRange(1, 1000)
+            int_validator.setRange(1, 100)
             obj.setValidator(int_validator)
             obj.setText("40")
 
@@ -90,6 +90,10 @@ class QueensUI(QtWidgets.QMainWindow):
         # QComboBox widget
             obj.addItem("simple")
 
+        elif name == "remove old graphics":
+        # QCheckBox widget
+            obj.setChecked(True)
+
         return obj
 
     def _init_left_layout(self):
@@ -108,6 +112,7 @@ class QueensUI(QtWidgets.QMainWindow):
             ("fixed temperature iterations", "Number of iterations\nwith fixed temperature", QLineEdit),
             # ("decreasing rule", "Rule to\ndecrease temperature", QComboBox),
             ("decreasing coefficient", "Exponential\ncoefficient", QDoubleSpinBox),
+            ("remove old graphics", "Remove old\ngraphics", QCheckBox),
             # ("energy difference coefficient", "Rule to count\ndifference between energies", QComboBox),
         ]
 
@@ -119,7 +124,8 @@ class QueensUI(QtWidgets.QMainWindow):
 
             self.handlers[name] = self.tune_handler(name, object)
             self.handlers[name].setMaximumWidth(max_width)
-            self.handlers[name].setAlignment(Qt.AlignTop)
+            if isinstance(obj, QLineEdit):
+                self.handlers[name].setAlignment(Qt.AlignTop)
 
             self.handlers[name + "_label"] = QLabel()
             self.handlers[name + "_label"].setText(description)
@@ -140,13 +146,6 @@ class QueensUI(QtWidgets.QMainWindow):
         self.solve_button.setText("Solve")
         self.solve_button.clicked.connect(self.solve)
         self.left_layout.addWidget(self.solve_button)
-
-    def paintEvent(self, event=None):
-        # if self.solution:
-        qp = QPainter()
-        qp.begin(self)
-        qp.drawImage(QRectF(400, 100, 400, 400), QImage("/home/emperornao/Downloads/Telegram Desktop/image_2022-07-07_18-35-03.png"))
-        qp.end()
 
     def _init_center_layout(self):
         self.central_layout = QGridLayout()
@@ -179,6 +178,41 @@ class QueensUI(QtWidgets.QMainWindow):
         self.right_layout.addWidget(self.prob_graphic)
         self.right_layout.addWidget(self.temp_graphic)
         self.right_layout.addWidget(self.cost_graphic)
+
+    def paintEvent(self, event=None):
+
+        if self.solution:
+
+            n = int(self.handlers['n'].text())
+            if n != len(self.solution):
+                return
+
+            start_coord_x = 400
+            start_coord_y = 100
+
+            orig_size = 400
+            size = int(orig_size // n)
+
+            qp = QPainter()
+            qp.begin(self)
+
+            black_brush = QBrush(QColor(100, 0, 0, 0))
+            # white_brush = QBrush(QColor(100, 100, 100, 0))
+
+            for x in range(n):
+                for y in range(n):
+                    # if (x + y) % 2:
+                    #     br = white_brush
+                    # else:
+                    #     br = black_brush
+
+                    qp.setBrush(black_brush)
+                    pos = QRect(start_coord_x + x * size, start_coord_y + y * size, size, size)
+                    qp.drawRect(pos)
+                    if self.solution[x] == y:
+                        qp.drawImage(pos, QImage("/home/emperornao/projects/optimization/queens_UI/queen.svg"))
+
+            qp.end()
 
     def create_options(self, annealing_config, queens_config):
 
@@ -262,9 +296,10 @@ class QueensUI(QtWidgets.QMainWindow):
         cost = list(map(lambda x: x['cost'], stats))
         iterations = [i for i in range(len(stats))]
 
-        self.prob_graphic.clear()
-        self.temp_graphic.clear()
-        self.cost_graphic.clear()
+        if self.handlers['remove old graphics'].isChecked():
+            self.prob_graphic.clear()
+            self.temp_graphic.clear()
+            self.cost_graphic.clear()
 
         self.prob_graphic.getPlotItem().plot(temperature, avg_proba, pen='blue', width=10)
         self.temp_graphic.getPlotItem().plot(iterations, temperature, pen='orange', width=10)
@@ -301,9 +336,11 @@ class QueensUI(QtWidgets.QMainWindow):
         self.info.clear()
         self.info.setText(text)
 
-        self.solution = best_solution
+        self.solution = list(map(int, best_solution))
 
         self.draw_graphics(stats)
+
+        self.update()
 
         # draw graphics
 
