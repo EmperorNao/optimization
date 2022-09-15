@@ -22,7 +22,7 @@ private:
         }
 
         uint64_t mult = 1;
-        for (uint64_t idx = dimensions.size() - 1; idx >= 0; idx -= 1) {
+        for (int64_t idx = dimensions.size() - 1; idx >= 0; idx -= 1) {
 
             dimensions_bias[idx] = mult;
             mult *= dimensions[idx];
@@ -32,11 +32,18 @@ private:
     }
 
 public:
-    Matrix(std::vector<uint64_t> dims): dimensions(dims) {
 
-        int64_t n_elements  = std::accumulate(begin(dimensions), end(dimensions), 1, std::multiplies<int>());
-        data.resize(n_elements);
-        init_bias();
+    Matrix() {
+
+        dimensions.resize(0);
+        dimensions_bias.resize(0);
+        data.resize(0);
+
+    }
+
+    Matrix(std::vector<uint64_t> dims) {
+
+        this->resize(dims);
 
     }
 
@@ -56,7 +63,7 @@ public:
 
     }
 
-    T& get(std::initializer_list<int> indexes) {
+    T& get(std::initializer_list<uint64_t> indexes) {
 
         if (indexes.size() != dimensions.size()) {
             throw std::invalid_argument("Wrong number of indexes");
@@ -74,6 +81,25 @@ public:
 
     }
 
+    T& operator[](std::initializer_list<uint64_t> indexes) {
+
+        return this->get(indexes);
+
+    }
+
+    void resize(std::vector<uint64_t> dims) {
+
+        dimensions = dims;
+        dimensions_bias.resize(dims.size());
+        int64_t n_elements  = std::accumulate(begin(dimensions), end(dimensions), 1, std::multiplies<int>());
+        data.resize(n_elements);
+        init_bias();
+
+    }
+
+    std::vector<uint64_t> size() const {
+        return dimensions;
+    }
 
 };
 
