@@ -12,6 +12,8 @@ from drawing_math import Point, get_points
 
 from functools import reduce
 
+from run_executable import BinRunner
+
 
 class QueensUI(QtWidgets.QMainWindow):
 
@@ -37,28 +39,9 @@ class QueensUI(QtWidgets.QMainWindow):
         self.best_cost = float('+inf')
         self.app_dir = "/home/{user}/.ants".format(user=os.getlogin())
         self.pheromone_matrix = None
-        self.distance_matrix = [
-            [0, 18, 40, 27, 15, 4, 13, 38, 15],
-            [18, 0, 33, 9, 19, 26, 18, 8, 35],
-            [38, 33, 0, 17, 22, 14, 26, 22, 11],
-            [25, 10, 15, 0, 33, 22, 6, 20, 5],
-            [15, 21, 21, 31, 0, 10, 26, 33, 27],
-            [6, 27, 16, 24, 10, 0, 22, 25, 32],
-            [12, 19, 26, 5, 25, 21, 0, 28, 20],
-            [36, 7, 24, 21, 31, 27, 26, 0, 13],
-            [15, 33, 10, 5, 27, 32, 19, 12, 0],
-        ]
-        self.pheromone_matrix = [
-            [1.74787e-46, 65.9527, 14.6191, 7.69346, 48.6673, 402.16, 130.301, 17.9324, 42.4507],
-            [67.9444, 1.74787e-46, 44.8813, 161.558, 100.369, 19.501, 42.2772, 271.421, 21.8246],
-            [24.1731, 38.7565, 1.74787e-46, 45.662, 94.737, 138.596, 64.9664, 96.2969, 226.589],
-            [14.585, 77.1425, 26.4272, 1.74787e-46, 13.6072, 15.7934, 318.869, 15.9818, 247.37],
-            [105.416, 129.58, 217.644, 18.8981, 1.74787e-46, 97.3297, 69.5985, 58.5558, 32.7549],
-            [175.803, 26.9637, 81.4932, 19.2092, 354.188, 1.74787e-46, 25.7592, 41.1385, 5.22206],
-            [255.828, 53.8591, 55.3374, 210.555, 44.0462, 18.3342, 1.74787e-46, 68.2209, 23.5963],
-            [30.3524, 327.636, 76.8277, 17.8158, 52.2899, 31.6945, 63.1912, 1.74787e-46, 129.969],
-            [55.6752, 9.88627, 212.547, 248.385, 21.8723, 6.36811, 14.8135, 160.229, 1.74787e-46],
-        ]
+        self.distance_matrix = None
+        self.pheromone_matrix = None
+        self.filename = None
 
     def tune_handler(self, name, widget):
 
@@ -70,6 +53,7 @@ class QueensUI(QtWidgets.QMainWindow):
             int_validator.setRange(1, 100)
             obj.setValidator(int_validator)
             obj.setText("10")
+            obj.textChanged.connect(self.redraw)
 
         if name == "Q":
         # QLineEdit widget
@@ -131,7 +115,7 @@ class QueensUI(QtWidgets.QMainWindow):
 
         # name, description, object, func
         handlers = [
-            ("max iterations", "Number of\niterations", QLineEdit),
+            ("max_iterations", "Number of\niterations", QLineEdit),
             ("n", "Number of\nvertexes", QLineEdit),
             ("alpha", "Alpha", QLineEdit),
             ("beta", "Beta", QLineEdit),
@@ -216,8 +200,11 @@ class QueensUI(QtWidgets.QMainWindow):
     def paintEvent(self, event=None):
 
         # if self.graph:
+        try:
+            vertexes = int(self.handlers["n"].text())
+        except:
+            pass
 
-        vertexes = 9
         point_radius = 10
         orig_size = 700
         graph_radius = 250
@@ -241,13 +228,13 @@ class QueensUI(QtWidgets.QMainWindow):
 
         qp.end()
 
-        if self.pheromone_matrix:
+        if self.pheromone_matrix or self.distance_matrix:
 
             qp = QPainter()
 
             qp.begin(self)
-            all_values_pheromones = sorted(reduce(lambda accum, x: accum + x, self.pheromone_matrix))
-            all_values_distances = sorted(reduce(lambda accum, x: accum + x, self.distance_matrix))
+            all_values_pheromones = sorted(reduce(lambda accum, x: accum + x, self.pheromone_matrix)) if self.pheromone_matrix else None
+            all_values_distances = sorted(reduce(lambda accum, x: accum + x, self.distance_matrix)) if self.distance_matrix else None
             def get_color(all_values, value):
                 colors = [QColor(0, 0, 0),
                           QColor(255, 0, 255),
@@ -282,170 +269,129 @@ class QueensUI(QtWidgets.QMainWindow):
                 colors_idx = idx // step
                 return width[-colors_idx]
 
-            for x in range(len(self.pheromone_matrix)):
-                for y in range(len(self.pheromone_matrix)):
-                    pen = QPen(get_color(all_values_pheromones, self.pheromone_matrix[x][y]),
-                               get_width(all_values_distances, self.distance_matrix[x][y]),
+            for x in range(vertexes):
+                for y in range(vertexes):
+                    pen = QPen(get_color(all_values_pheromones, self.pheromone_matrix[x][y]) if self.pheromone_matrix else Qt.black,
+                               get_width(all_values_distances, self.distance_matrix[x][y]) if self.distance_matrix else 3,
                                Qt.SolidLine)
                     qp.setPen(pen)
                     qp.drawLine(QPoint(points[x].x, points[x].y), QPoint(points[y].x, points[y].y))
 
-            # black_pen = QPen(QColor(0, 0, 0), 3, Qt.SolidLine)
-            # qp.setPen(black_pen)
-            # qp.drawLine()
-
             qp.end()
             self.update()
 
-            # white_brush = QBrush(QColor(100, 100, 100, 0))
+    def create_options(self, ants_config):
 
-            # for x in range(n):
-            #     for y in range(n):
-            #         # if (x + y) % 2:
-            #         #     br = white_brush
-            #         # else:
-            #         #     br = black_brush
-            #
-            #         qp.setBrush(black_brush)
-            #         pos = QRect(start_coord_x + x * size, start_coord_y + y * size, size, size)
-            #         qp.drawRect(pos)
-            #         if self.solution[x] == y:
-            #             qp.drawImage(pos, QImage("/home/emperornao/projects/optimization/queens_UI/queen.svg"))
-            #
-            # qp.end()
+        with open(ants_config, "w") as ants_file:
+            ants_file.write("seed: " + "0" + '\n')
 
-    def create_options(self, annealing_config, queens_config):
+            ants_file.write("data_path: " + self.filename + '\n')
+            ants_file.write("max_iterations: " + self.handlers["max_iterations"].text() + '\n')
+            ants_file.write("alpha: " + self.handlers["alpha"].text() + '\n')
+            ants_file.write("beta: " + self.handlers["beta"].text() + '\n')
+            ants_file.write("k: " + self.handlers["k"].text() + '\n')
+            ants_file.write("Q: " + self.handlers["Q"].text() + '\n')
+            ants_file.write("start_pheromone: " + self.handlers["start_pheromone"].text() + '\n')
 
-        with open(queens_config, "w") as queens_file:
-            queens_file.write("n: " + self.handlers["n"].text() + '\n')
-
-        with open(annealing_config, "w") as annealing_file:
-            annealing_file.write("seed: " + "0" + '\n')
-            annealing_file.write("precision: " + "1e-6" + '\n')
-            annealing_file.write("decreasing_rule: " + "exponential" + '\n')
-            
-            annealing_file.write("solution_config_file: " + queens_config + '\n')
-
-            annealing_file.write("max_iterations: " + self.handlers["max iterations"].text() + '\n')
-            annealing_file.write("start_temperature: " + self.handlers["start temperature"].text() + '\n')
-            annealing_file.write("min_temperature: " + self.handlers["min temperature"].text() + '\n')
-            annealing_file.write("fixed_temperature_iterations: " + self.handlers["fixed temperature iterations"].text() + '\n')
-            annealing_file.write("decreasing_coefficient: " + str(self.handlers["decreasing coefficient"].value()) + '\n')
+            ants_file.write("rho: " + str(self.handlers["rho"].value()) + '\n')
 
     def parse_logs(self, time_log, program_log):
 
         time_stats = "\n".join(open(time_log).readlines())
 
-        best_solution = []
-        best_cost = float("+inf")
+        with open(program_log) as log:
 
-        stats = []
-        with open(program_log) as file:
+            best_cost = None
+            best_path = None
+            self.pheromone_matrix = []
+            end = False
+            best_path_next = False
+            for line in log:
 
-            started = False
-            cur_iter = None
-
-            avg_prob = None
-            cnt_inner_iters = 0
-
-            for line in file:
-
-                if line == "\n":
+                if best_path_next:
+                    best_path = line.strip()
                     continue
-                if not started and not line.startswith('Starting annealing'):
+                if end and "Best cost" in line:
+                    best_cost = int(line.split("=")[-1])
                     continue
-                elif line.startswith('Starting annealing'):
-                    started = True
+                if end and "Best path" in line:
+                    best_path_next = True
+                    continue
 
-                if line.startswith("iter") or line.startswith("Ended search"):
-                    if cur_iter:
-                        cur_iter["avg_probability"] = avg_prob / cnt_inner_iters
-                        stats.append(cur_iter)
+                if "Ended" in line:
+                    end = True
+                    continue
+                if not end:
+                    continue
 
-                    cur_iter = {}
-                    avg_prob = None
-                    cnt_inner_iters = 0
+                if line != '\n' and "Pheromone matrix" not in line:
+                    self.pheromone_matrix.append(list(map(float, line.strip()[:-1].split(","))))
 
-                elif line.startswith("best cost"):
-                    cur_iter["cost"] = float(line.split("=")[-1].strip())
-
-                elif line.startswith("current temperature"):
-                    cur_iter["temperature"] = float(line.split("=")[-1].strip())
-
-                elif line.startswith("inner iter"):
-                    if avg_prob is None:
-                        avg_prob = 0
-                        cnt_inner_iters = 0
-
-                elif line.startswith("probability"):
-                    avg_prob += float(line.split("=")[-1].strip())
-                    cnt_inner_iters += 1
-
-                elif line.startswith("Found best solution"):
-                    best_solution = line.split("=")[-1].strip().split()
-
-                elif line.startswith("Best cost"):
-                    best_cost = float(line.split("=")[-1].strip())
-
-        return best_solution, best_cost, time_stats, stats
+        # best_path, best_cost, time_stats, stats
+        return best_path, best_cost, time_stats, []
 
     def draw_graphics(self, stats):
 
-        temperature = list(map(lambda x: x['temperature'], stats))
-        avg_proba = list(map(lambda x: x['avg_probability'], stats))
-        cost = list(map(lambda x: x['cost'], stats))
-        iterations = [i for i in range(len(stats))]
-
-        if self.handlers['remove old graphics'].isChecked():
-            self.prob_graphic.clear()
-            self.temp_graphic.clear()
-            self.cost_graphic.clear()
-
-        self.prob_graphic.getPlotItem().plot(temperature, avg_proba, pen='blue', width=10)
-        self.temp_graphic.getPlotItem().plot(iterations, temperature, pen='orange', width=10)
-        self.cost_graphic.getPlotItem().plot(temperature, cost, pen='red', width=10)
+        # temperature = list(map(lambda x: x['temperature'], stats))
+        # avg_proba = list(map(lambda x: x['avg_probability'], stats))
+        # cost = list(map(lambda x: x['cost'], stats))
+        # iterations = [i for i in range(len(stats))]
+        #
+        # if self.handlers['remove old graphics'].isChecked():
+        #     self.prob_graphic.clear()
+        #     self.temp_graphic.clear()
+        #     self.cost_graphic.clear()
+        #
+        # self.prob_graphic.getPlotItem().plot(temperature, avg_proba, pen='blue', width=10)
+        # self.temp_graphic.getPlotItem().plot(iterations, temperature, pen='orange', width=10)
+        # self.cost_graphic.getPlotItem().plot(temperature, cost, pen='red', width=10)
+        pass
 
     def load_file(self):
-        pass
+        self.filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Get adjacency matrix')[0]
+
+        with open(self.filename) as file:
+            self.distance_matrix = []
+            n = int(file.readline().split(',')[0])
+            for idx in range(n):
+                self.distance_matrix.append(file.readline().strip().split(","))
+
+        self.update()
+
+    def redraw(self):
+        if self.handlers['n'].text():
+            self.update()
 
     def solve(self):
 
-        pass
-        # get options
-        # create options file
+        if not self.filename:
+            return
+
         if not os.path.exists(self.app_dir):
             os.mkdir(self.app_dir)
 
-        annealing_config = os.path.join(self.app_dir, "annealing.conf")
-        queens_config = os.path.join(self.app_dir, "queens.conf")
+        ants_config = os.path.join(self.app_dir, "ants.conf")
 
-        self.create_options(annealing_config, queens_config)
+        self.create_options(ants_config)
 
-        # start bin
-        # need to do it in threads to do not stop main window
+        runner = BinRunner("/home/emperornao/projects/optimization/ants_UI/ants")
 
         time_log = os.path.join(self.app_dir, "time.log")
         program_log = os.path.join(self.app_dir, "stdout.log")
 
+        runner.run(ants_config, program_log, time_log)
+
         # parse results
-        best_solution, best_cost, time_stats, stats = self.parse_logs(time_log, program_log)
+        best_path, best_cost, time_stats, stats = self.parse_logs(time_log, program_log)
 
         text = [time_stats]
-        text.append("Best founded solution = " + " ".join(best_solution) + "\n")
+        text.append("Best founded path = " + " ".join(best_path) + "\n")
         text.append("Best cost = " + str(best_cost) + "\n")
         text = "".join(text)
 
         self.info.clear()
         self.info.setText(text)
 
-        self.solution = list(map(int, best_solution))
+        self.solution = best_path
 
         self.draw_graphics(stats)
-
-        # draw graphics
-
-        # save solution
-
-        # paintevent automatic
-        # import math
-        # self.prob_graphic.getPlotItem().plot([i for i in range(100)], [math.exp(i) for i in range(100)], width = 5, pen='r')
