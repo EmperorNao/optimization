@@ -17,8 +17,8 @@ private:
     double alpha;
     double beta;
     double rho;
-    double Q;
-    double start_pheromone;
+    uint64_t Q;
+    uint64_t start_pheromone;
     uint64_t k;
     uint64_t max_iterations;
 
@@ -28,9 +28,9 @@ public:
         alpha = conf.get<double>("alpha");
         beta = conf.get<double>("beta");
         rho = conf.get<double>("rho");
-        Q = conf.get<double>("Q");
+        Q = conf.get<uint64_t>("Q");
         k = conf.get<uint64_t>("k");
-        start_pheromone = conf.get<double>("start_pheromone");
+        start_pheromone = conf.get<uint64_t>("start_pheromone");
         max_iterations = conf.get<uint64_t>("max_iterations");
         // TODO constraints
 
@@ -42,6 +42,18 @@ public:
             throw std::invalid_argument("Expected for data to be a square matrix, got ("
             + std::to_string(distance_matrix.size()[0]) + " x "
             + std::to_string(distance_matrix.size()[1]) + ")");
+        }
+
+        if (verbose) {
+            std::cout << "Starting ants simulation with parameters: \n";
+            std::cout << "alpha = " << alpha << "\n";
+            std::cout << "beta = " << beta << "\n";
+            std::cout << "rho = " << rho << "\n";
+            std::cout << "Q = " << Q << "\n";
+            std::cout << "k = " << k << "\n";
+            std::cout << "start_pheromone = " << start_pheromone << "\n";
+            std::cout << "max_iterations = " << max_iterations << "\n";
+            std::cout << "\n\n";
         }
 
         uint64_t n_vertexes = distance_matrix.size()[0];
@@ -65,6 +77,10 @@ public:
         // TODO another convergence condition
         for (iterations = 0; iterations < max_iterations; ++iterations) {
 
+            if (verbose) {
+                std::cout << "Iteration #" << iterations << "\n\n";
+            }
+
             for (uint64_t x = 0; x < n_vertexes; ++x) {
                 for (uint64_t y = 0; y < n_vertexes; ++y) {
                     vertexes_visited_ants_idx[{x ,y}].resize(0);
@@ -72,6 +88,10 @@ public:
             }
 
             for (uint64_t ant_idx = 0; ant_idx < k; ++ant_idx) {
+
+                if (verbose) {
+                    std::cout << "Ant #" << iterations << "\n";
+                }
 
                 std::set<uint64_t> visited;
                 std::vector<uint64_t> path;
@@ -113,7 +133,7 @@ public:
                     }
 
                     if (verbose) {
-                        std::cout << "Counter proba: \n";
+                        std::cout << "Counter probability: \n";
                         uint64_t idx = 0;
                         for (auto& proba_el: proba) {
                             std::cout << "#"<< idx << " = " << proba_el << "\t";
@@ -138,16 +158,8 @@ public:
                             break;
                         }
                     }
-//                    if (next_vertex_idx == 0 && generated_proba > proba_sum) {
-//                        uint64_t last_idx = n_vertexes - 1;
-//                        while (proba[last_idx] == 0 && last_idx > 0) {
-//                            --last_idx;
-//                        }
-//                        next_vertex_idx = last_idx;
-//                    }
 
                     if (verbose) {
-                        std::cout << "Proba sum = " << proba_sum << "\n";
                         std::cout << "Selected vertex #" << next_vertex_idx << "\n";
                     }
 
@@ -164,6 +176,7 @@ public:
                 cost += distance_matrix[{current_vertex_idx, path[0]}];
                 path.push_back(path[0]);
                 if (verbose) {
+                    std::cout << "Current cost = " << cost << "\n";
                     std::cout << "Current path: \n";
                     for (auto& el: path) {
                         std::cout << el << " ";
@@ -195,6 +208,19 @@ public:
                     pheromone_matrix[{x, y}] = pheromone_matrix[{x, y}] * rho + sum;
 
                 }
+            }
+
+            if (verbose) {
+                std::cout << "Best cost = " << best_cost << "\n\n";
+
+                std::cout << "Pheromone matrix after update\n";
+                for (uint64_t x = 0; x < n_vertexes; ++x) {
+                    for (uint64_t y = 0; y < n_vertexes; ++y) {
+                        std::cout << pheromone_matrix[{x, y}] << ", ";
+                    }
+                    std::cout << "\n";
+                }
+                std::cout << "\n";
             }
 
         }
