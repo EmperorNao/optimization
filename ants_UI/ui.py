@@ -123,7 +123,7 @@ class QueensUI(QtWidgets.QMainWindow):
             ("k", "Number of\nants", QLineEdit),
             ("Q", "Q", QLineEdit),
             ("start_pheromone", "Start\npheromone", QLineEdit),
-            # ("", "Remove old\ngraphics", QCheckBox),
+            ("remove_old_graphics", "Remove old\ngraphics", QCheckBox),
             # ("energy difference coefficient", "Rule to count\ndifference between energies", QComboBox),
         ]
 
@@ -177,42 +177,33 @@ class QueensUI(QtWidgets.QMainWindow):
         self.right_layout.setSizeConstraint(QLayout.SetFixedSize)
         self.general_layout.addLayout(self.right_layout)
 
-        self.prob_graphic = pg.PlotWidget()
-        self.temp_graphic = pg.PlotWidget()
-        self.cost_graphic = pg.PlotWidget()
+        self.cost_parent_widget = QWidget()
+        self.cost_parent_widget.setMinimumHeight(450)
 
-        self.prob_graphic.setBackground('w')
-        self.prob_graphic.setLabel('left', 'avg wrong choise proba')
-        self.prob_graphic.setLabel('bottom', 'temperature')
-
-        self.temp_graphic.setBackground('w')
-        self.temp_graphic.setLabel('left', 'temperature')
-        self.temp_graphic.setLabel('bottom', 'iteration')
+        self.cost_graphic = pg.PlotWidget(self.cost_parent_widget)
 
         self.cost_graphic.setBackground('w')
-        self.cost_graphic.setLabel('left', 'energy')
-        self.cost_graphic.setLabel('bottom', 'temperature')
+        self.cost_graphic.setLabel('left', 'best_cost')
+        self.cost_graphic.setLabel('bottom', 'iterations')
 
-        self.right_layout.addWidget(self.prob_graphic)
-        self.right_layout.addWidget(self.temp_graphic)
         self.right_layout.addWidget(self.cost_graphic)
+        self.right_layout.addWidget(self.cost_parent_widget)
 
     def paintEvent(self, event=None):
 
-        # if self.graph:
         try:
             vertexes = int(self.handlers["n"].text())
         except:
             pass
 
+        if not vertexes:
+            return
+
         point_radius = 10
         orig_size = 700
         graph_radius = 250
 
-        start_coord_x = 400
-        start_coord_y = 150
-
-        center_point = Point(625, 350)
+        center_point = Point(650, 350)
 
         points = get_points(center_point, graph_radius, vertexes)
         points_to_numbers = get_points(center_point, graph_radius + 40, vertexes)
@@ -259,7 +250,7 @@ class QueensUI(QtWidgets.QMainWindow):
                 return colors[-colors_idx]
 
             def get_width(all_values, value):
-                width = [3 + 1.5 ** i for i in range(5)]
+                width = [1 + 1.5 ** i for i in range(5)]
 
                 if len(all_values) < len(width):
                     return width[-all_values.find(value)]
@@ -272,7 +263,7 @@ class QueensUI(QtWidgets.QMainWindow):
             for x in range(vertexes):
                 for y in range(vertexes):
                     pen = QPen(get_color(all_values_pheromones, self.pheromone_matrix[x][y]) if self.pheromone_matrix else Qt.black,
-                               get_width(all_values_distances, self.distance_matrix[x][y]) if self.distance_matrix else 3,
+                               get_width(all_values_distances, self.distance_matrix[x][y]) if self.distance_matrix else 1,
                                Qt.SolidLine)
                     qp.setPen(pen)
                     qp.drawLine(QPoint(points[x].x, points[x].y), QPoint(points[y].x, points[y].y))
@@ -304,12 +295,13 @@ class QueensUI(QtWidgets.QMainWindow):
             best_cost = None
             best_path = None
             self.pheromone_matrix = []
+            best_cost_by_iter = []
             end = False
             best_path_next = False
             for line in log:
 
                 if best_path_next:
-                    best_path = line.strip()
+                    best_path = line.strip().split(" ")
                     continue
                 if end and "Best cost" in line:
                     best_cost = int(line.split("=")[-1])
@@ -317,7 +309,9 @@ class QueensUI(QtWidgets.QMainWindow):
                 if end and "Best path" in line:
                     best_path_next = True
                     continue
-
+                if "Best cost" in line:
+                    best_cost_by_iter.append(int(line.split("=")[-1]))
+                    continue
                 if "Ended" in line:
                     end = True
                     continue
@@ -328,24 +322,17 @@ class QueensUI(QtWidgets.QMainWindow):
                     self.pheromone_matrix.append(list(map(float, line.strip()[:-1].split(","))))
 
         # best_path, best_cost, time_stats, stats
-        return best_path, best_cost, time_stats, []
+        return best_path, best_cost, time_stats, {"best_cost_iter": best_cost_by_iter}
 
     def draw_graphics(self, stats):
 
-        # temperature = list(map(lambda x: x['temperature'], stats))
-        # avg_proba = list(map(lambda x: x['avg_probability'], stats))
-        # cost = list(map(lambda x: x['cost'], stats))
-        # iterations = [i for i in range(len(stats))]
-        #
-        # if self.handlers['remove old graphics'].isChecked():
-        #     self.prob_graphic.clear()
-        #     self.temp_graphic.clear()
-        #     self.cost_graphic.clear()
-        #
-        # self.prob_graphic.getPlotItem().plot(temperature, avg_proba, pen='blue', width=10)
-        # self.temp_graphic.getPlotItem().plot(iterations, temperature, pen='orange', width=10)
-        # self.cost_graphic.getPlotItem().plot(temperature, cost, pen='red', width=10)
-        pass
+        cost = stats["best_cost_iter"]
+        iterations = [i for i in range(len(cost))]
+
+        if self.handlers['remove_old_graphics'].isChecked():
+            self.cost_graphic.clear()
+
+        self.cost_graphic.getPlotItem().plot(iterations, cost, pen='blue', width=10)
 
     def load_file(self):
         self.filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Get adjacency matrix')[0]

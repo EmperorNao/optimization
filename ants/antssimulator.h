@@ -90,7 +90,7 @@ public:
             for (uint64_t ant_idx = 0; ant_idx < k; ++ant_idx) {
 
                 if (verbose) {
-                    std::cout << "Ant #" << iterations << "\n";
+                    std::cout << "Ant #" << ant_idx << "\n";
                 }
 
                 std::set<uint64_t> visited;
@@ -195,7 +195,7 @@ public:
                     best_cost = cost;
                     best_path = path;
                 }
-
+                
             }
 
             for (uint64_t x = 0; x < n_vertexes; ++x) {
