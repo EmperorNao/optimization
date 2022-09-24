@@ -43,6 +43,10 @@ public:
         this->resize(dims);
     }
 
+    Matrix(std::vector<uint64_t> dims, T default_value) {
+        this->resize(dims, default_value);
+    }
+
     Matrix(uint64_t size, T default_value) {
         dimensions.resize(1, size);
         data.resize(size, default_value);
@@ -82,6 +86,14 @@ public:
         dimensions_bias.resize(dims.size());
         int64_t n_elements  = std::accumulate(begin(dimensions), end(dimensions), 1, std::multiplies<int>());
         data.resize(n_elements);
+        init_bias();
+    }
+
+    void resize(std::vector<uint64_t> dims, T default_value) {
+        dimensions = dims;
+        dimensions_bias.resize(dims.size());
+        int64_t n_elements  = std::accumulate(begin(dimensions), end(dimensions), 1, std::multiplies<int>());
+        data.resize(n_elements, default_value);
         init_bias();
     }
 

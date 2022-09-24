@@ -51,5 +51,32 @@ public:
 };
 
 
+class GaussianGenerator {
+
+private:
+    std::mt19937 generator;
+    std::normal_distribution<double> distribution;
+
+public:
+    GaussianGenerator(int64_t seed, double mean, double stddev = 1.0): distribution(mean, stddev) {
+        generator.seed(seed);
+    }
+
+    double generate() {
+
+        return distribution(generator);
+
+    }
+
+
+    void shuffle(std::vector<uint64_t>& vec) {
+
+        std::shuffle(vec.begin(), vec.end(), generator);
+
+    }
+
+};
+
+
 
 #endif //UTILS_UTILS_H
