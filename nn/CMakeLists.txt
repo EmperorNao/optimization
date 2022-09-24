@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 add_subdirectory("${PROJECT_SOURCE_DIR}/../utils" utils)
 
 
-add_library(nn core/functional.h functional.h numerical/numerical.h numerical/numerical.cpp functional.cpp nn.cpp nn.h layer_options.cpp layer_options.h)
+add_library(nn core/functional.h numerical/numerical.h numerical/numerical.cpp core/functional.cpp core/nn.cpp core/nn.h core/layer.h optimization/optimization.h optimization/sgd.h)
 
 
 

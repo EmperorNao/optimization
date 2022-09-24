@@ -39,23 +39,24 @@
 //}
 
 
-Matrix<double> linear_operator(Matrix<double>& data, Matrix<double>& A, Matrix<double>& B) {
-    // data * A.T + B
-
-    auto size = data.size();
-
-    if (size.size() > 2) {
-        throw std::invalid_argument("Max only for matrixes with less then 2 dimensions, "
-                                    "provided " + std::to_string(size.size()));
-    }
-
-    Matrix<double> output(std::vector<uint64_t>{0, 0});
-
-    return output;
-
-}
+Matrix<double> matrix_scalar_multiplication(Matrix<double>& A, double val);
+// return A * val
 
 
+Matrix<double> matrix_addition(Matrix<double>& A, Matrix<double>& B);
+// return A + B
+
+
+Matrix<double> matrix_product(Matrix<double>& A, Matrix<double>& B);
+// return A * B
+
+
+Matrix<double> linear_operator(Matrix<double>& data, Matrix<double>& A, Matrix<double>& B);
+// return data * A + B
+
+
+void transpose(Matrix<double>& data);
+// data = data.T
 
 
 #endif //NN_NUMERICAL_H

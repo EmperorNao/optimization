@@ -5,9 +5,10 @@
 #include <random>
 #include <memory>
 
-#include "core/functional.h"
-#include "numerical/numerical.h"
-#include "core/layer.h"
+#include "layer.h"
+#include "functional.h"
+#include "../numerical/numerical.h"
+#include "../optimization/optimization.h"
 
 #include "utils.h"
 

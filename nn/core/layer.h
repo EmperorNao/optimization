@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <map>
 
-#include "functional.h"
+#include "../core/functional.h"
 
 
 class Layer {
