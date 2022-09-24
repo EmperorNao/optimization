@@ -23,10 +23,8 @@ private:
 
         uint64_t mult = 1;
         for (int64_t idx = dimensions.size() - 1; idx >= 0; idx -= 1) {
-
             dimensions_bias[idx] = mult;
             mult *= dimensions[idx];
-
         }
 
     }
@@ -42,25 +40,19 @@ public:
     }
 
     Matrix(std::vector<uint64_t> dims) {
-
         this->resize(dims);
-
     }
 
     Matrix(uint64_t size, T default_value) {
-
         dimensions.resize(1, size);
         data.resize(size, default_value);
         init_bias();
-
     }
 
     Matrix(uint64_t size) {
-
         dimensions.resize(1, size);
         data.resize(size);
         init_bias();
-
     }
 
     T& get(std::initializer_list<uint64_t> indexes) {
@@ -82,19 +74,15 @@ public:
     }
 
     T& operator[](std::initializer_list<uint64_t> indexes) {
-
         return this->get(indexes);
-
     }
 
     void resize(std::vector<uint64_t> dims) {
-
         dimensions = dims;
         dimensions_bias.resize(dims.size());
         int64_t n_elements  = std::accumulate(begin(dimensions), end(dimensions), 1, std::multiplies<int>());
         data.resize(n_elements);
         init_bias();
-
     }
 
     std::vector<uint64_t> size() const {
