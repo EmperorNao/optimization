@@ -2,7 +2,7 @@
 
 
 
-Matrix<double> ReLU::operator()(Matrix<double>& data) {
+Matrix<double> ReLU::function(Matrix<double>& data) {
 
     if (data.size().size() != 2) {
         throw std::domain_error("ReLU function expected data to be matrix with 2 dimensions, "
@@ -42,7 +42,7 @@ Matrix<double> ReLU::derivative(Matrix<double>& data) {
 }
 
 
-Matrix<double> Sigmoid::operator()(Matrix<double>& data) {
+Matrix<double> Sigmoid::function(Matrix<double>& data) {
 
     if (data.size().size() != 2) {
         throw std::domain_error("Sigmoid function expected data to be matrix with 1 dimension, "

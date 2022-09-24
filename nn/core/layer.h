@@ -1,10 +1,34 @@
-#ifndef NN_LAYER_OPTIONS_H
-#define NN_LAYER_OPTIONS_H
+#ifndef NN_LAYER_H
+#define NN_LAYER_H
 
 #include <cstdint>
 #include <map>
 
 #include "functional.h"
+
+
+class Layer {
+
+public:
+    Matrix<double> w;
+    Matrix<double> b;
+    std::shared_ptr<Functional> activation;
+    bool has_activation = true;
+    Layer(ACTIVATION _activation) {
+        if (_activation == ACTIVATION::ReLU) {
+            activation = std::make_unique<ReLU>();
+        }
+        else if (_activation == ACTIVATION::Sigmoid) {
+            activation = std::make_unique<Sigmoid>();
+        }
+        else if (_activation == ACTIVATION::Identity) {
+            activation = std::make_shared<Identity>();
+            has_activation = false;
+        }
+    }
+
+};
+
 
 
 enum class WEIGHT_INITIALIZATION {
@@ -28,7 +52,12 @@ public:
                  ACTIVATION activation=DEFAULT_ACTIVATION,
                  WEIGHT_INITIALIZATION initialization=DEFAULT_INITIALIZATION
                  //,use_residual=NOT_IMPLEMENTED_YET
-    ): inputs_val(inputs), outputs_val(outputs), activation_val(activation), initialization_val(initialization) {};
+    ):
+    inputs_val(inputs),
+    outputs_val(outputs),
+    activation_val(activation),
+    initialization_val(initialization)
+    {};
 
     uint64_t inputs() const { return inputs_val; }
     uint64_t outputs() const { return outputs_val; }
@@ -38,4 +67,4 @@ public:
 };
 
 
-#endif //NN_LAYER_OPTIONS_H
+#endif //NN_LAYER_H
