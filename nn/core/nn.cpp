@@ -1,9 +1,52 @@
 #include "nn.h"
 
 
+std::vector<Layer> FullyConnectedNN::compute_grad(Matrix<double>& predicted, Matrix<double>& labels) {
+
+    std::vector<Layer> layers_grad;
+    std::vector<Matrix<double>> errors(layers.size() + 1);
+
+    auto last_layer_error = loss->derivative(predicted, labels);
+    Matrix<double> activation_matrix;
+
+    errors[layers.size()] = last_layer_error;
+
+
+    for (int64_t layer_idx = layers.size() - 1; layer_idx >= 0; --layer_idx) {
+
+        auto weights_transposed = transpose(layers[layer_idx].w);
+
+        if (layers[layer_idx].has_activation) {
+            activation_matrix = layers[layer_idx].activation->derivative(inputs[layer_idx + 1].a);
+            last_layer_error = dot_product(last_layer_error, activation_matrix);
+        }
+        last_layer_error = matrix_product(  errors[layer_idx + 1], weights_transposed);
+
+
+       errors[layer_idx] = last_layer_error;
+
+    }
+
+    for (uint64_t layer_idx = 0; layer_idx < layers.size(); ++layer_idx) {
+
+        Layer layer_grad(ACTIVATION::Identity);
+
+        layer_grad.b = errors[layer_idx + 1];
+
+        auto transposed_input = transpose(inputs[layer_idx].a);
+        layer_grad.w = matrix_product(transposed_input, errors[layer_idx + 1]);
+
+        layers_grad.push_back(layer_grad);
+    }
+
+    return layers_grad;
+
+}
+
+
 Layer FullyConnectedNN::create_layer(LayerOptions& options, Matrix<double>& data) {
 
-    Layer layer = Layer(options.activation());
+    Layer layer(options.activation());
     uint64_t n = data.size()[0];
 
     layer.w.resize(std::vector<uint64_t>{options.inputs(), options.outputs()});
@@ -48,19 +91,21 @@ Matrix<double> FullyConnectedNN::forward(Matrix<double>& data, bool eval, bool v
     }
 
     inputs.resize(layers.size() + 1);
-    inputs[0] = data;
 
+    inputs[0].a = data;
     for (uint64_t idx = 0; idx < layers.size(); ++idx) {
 
-        inputs[idx + 1] = linear_operator(inputs[idx], layers[idx].w, layers[idx].b);
+        inputs[idx + 1].z = linear_operator(inputs[idx].a, layers[idx].w, layers[idx].b);
         if (layers[idx].has_activation) {
-            inputs[idx + 1] = layers[idx].activation->function(inputs[idx + 1]);
+            inputs[idx + 1].a = layers[idx].activation->function(inputs[idx + 1].z);
+        }
+        else {
+            inputs[idx + 1].a = inputs[idx].z;
         }
 
     }
 
-    Matrix<double> output = inputs.back();
-    inputs.pop_back();
+    Matrix<double> output = inputs[layers.size()].a;
 
     if (eval) {
         inputs.clear();
@@ -71,9 +116,14 @@ Matrix<double> FullyConnectedNN::forward(Matrix<double>& data, bool eval, bool v
 }
 
 
-void backward(Matrix<double>& grad, bool verbose) {
+double FullyConnectedNN::backward(Matrix<double>& predicted, Matrix<double>& labels, bool verbose) {
 
+    double loss_value = loss->value(predicted, labels) / predicted.size()[0];
+    std::vector<Layer> layers_grad = compute_grad(predicted, labels);
 
+    optimize(layers, layers_grad, OPTIMIZATION_ALGO::SGD, optimization_parameters, verbose);
+    inputs.clear();
 
+    return loss_value;
 
 }

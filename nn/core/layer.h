@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <map>
+#include <memory>
 
 #include "../core/functional.h"
 
@@ -16,10 +17,10 @@ public:
     bool has_activation = true;
     Layer(ACTIVATION _activation) {
         if (_activation == ACTIVATION::ReLU) {
-            activation = std::make_unique<ReLU>();
+            activation = std::make_shared<ReLU>();
         }
         else if (_activation == ACTIVATION::Sigmoid) {
-            activation = std::make_unique<Sigmoid>();
+            activation = std::make_shared<Sigmoid>();
         }
         else if (_activation == ACTIVATION::Identity) {
             activation = std::make_shared<Identity>();
@@ -28,7 +29,6 @@ public:
     }
 
 };
-
 
 
 enum class WEIGHT_INITIALIZATION {

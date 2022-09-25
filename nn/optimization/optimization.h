@@ -3,8 +3,10 @@
 
 #include <map>
 
+
 #include "../core/layer.h"
-#include "sgd.h"
+#include "../core/layer.h"
+#include "../numerical/numerical.h"
 
 
 enum class OPTIMIZATION_ALGO {
@@ -14,20 +16,18 @@ enum class OPTIMIZATION_ALGO {
 
 void optimize(
         std::vector<Layer>& layers,
-        std::vector<Matrix<double>>& inputs,
-        Matrix<double>& grad,
+        std::vector<Layer>& grad,
         OPTIMIZATION_ALGO algorithm,
-        std::map<std::string, std::string>& algorithm_parameters
-        ) {
+        std::map<std::string, std::string>& algorithm_parameters,
+        bool verbose
+        );
 
-    switch (algorithm) {
-        case OPTIMIZATION_ALGO::SGD:
-            return sgd(layers, inputs, grad, algorithm_parameters);
-        default:
-            return sgd(layers, inputs, grad, algorithm_parameters);
-    }
 
-}
+void sgd(std::vector<Layer>& layers,
+         std::vector<Layer>& grad,
+         std::map<std::string, std::string>& parameters,
+         bool verbose
+);
 
 
 #endif //NN_OPTIMIZATION_H

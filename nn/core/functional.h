@@ -11,16 +11,12 @@ class Functional {
 
 private:
     std::string name;
-//    uint64_t deriv_args;
 
 public:
     Functional(std::string _name): name(_name) {};
 
     virtual Matrix<double> function(Matrix<double>& data) = 0;
     virtual Matrix<double> derivative(Matrix<double>& data) = 0;
-//    virtual Matrix<double> derivative2(Matrix<double>& data, Matrix<double>& labels) {
-//        throw std::domain_error("derivative2 not implemented for " + this->name);
-//    }
     virtual ~Functional() {};
 
 };
@@ -36,6 +32,7 @@ public:
     ReLU(): Functional("ReLU") {};
     Matrix<double> function(Matrix<double>& data);
     Matrix<double> derivative(Matrix<double>& data);
+    virtual ~ReLU() {};
 };
 
 
@@ -50,6 +47,7 @@ public:
     Sigmoid(): Functional("Sigmoid") {};
     Matrix<double> function(Matrix<double>& data);
     Matrix<double> derivative(Matrix<double>& data);
+    virtual ~Sigmoid() {};
 };
 
 
@@ -59,6 +57,7 @@ public:
     Identity(): Functional("Identity") {};
     Matrix<double> function(Matrix<double>& data) { return data; }
     Matrix<double> derivative(Matrix<double>& data) { return data; }
+    virtual ~Identity() {};
 };
 
 
