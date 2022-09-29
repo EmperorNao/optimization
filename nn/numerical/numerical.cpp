@@ -180,7 +180,7 @@ Matrix<double> mean(Matrix<double>& data, uint64_t axis) {
         );
     }
 
-    Matrix<double> output(axis? std::vector<uint64_t>{1, data.size()[1]} : std::vector<uint64_t>{data.size()[1], 1});
+    Matrix<double> output(axis? std::vector<uint64_t>{1, data.size()[1]} : std::vector<uint64_t>{data.size()[0], 1});
 
     if (axis) {
 
@@ -209,6 +209,91 @@ Matrix<double> mean(Matrix<double>& data, uint64_t axis) {
 
     }
 
+    return output;
+
+}
+
+
+Matrix<double> argmax(Matrix<double>& data, uint64_t axis) {
+
+    auto size = data.size();
+
+    if (size.size() != 2) {
+        throw std::invalid_argument("Mean only for matrixes with 2 dimensions, "
+                                    "provided " + std::to_string(size.size()));
+    }
+
+    if (axis > data.size().size()) {
+        throw std::invalid_argument("Axis out of dimensions. Expected less then " +
+                                    std::to_string(size.size()) + ", provided" +
+                                    std::to_string(axis)
+        );
+    }
+
+    Matrix<double> output;
+
+    if (axis) {
+
+        output.resize({1, data.size()[1]});
+        for (uint64_t idx = 0; idx < data.size()[1]; ++idx) {
+
+            output[{0, idx}] = 0;
+            double max = data[{0, idx}];
+            for (uint64_t idx_to_sum = 1; idx_to_sum < data.size()[0]; ++idx_to_sum) {
+                if (data[{idx_to_sum, idx}] > max) {
+                    output[{0, idx}] = idx_to_sum;
+                    max = data[{idx_to_sum, idx}];
+                }
+            }
+
+        }
+
+    }
+    else {
+
+        output.resize({data.size()[0], 1});
+        for (uint64_t idx = 0; idx < data.size()[0]; ++idx) {
+
+            output[{idx, 0}] = 0;
+            double max = data[{idx, 0}];
+            for (uint64_t idx_to_sum = 1; idx_to_sum < data.size()[1]; ++idx_to_sum) {
+                if (data[{idx, idx_to_sum}] > max) {
+                    output[{idx, 0}] = idx_to_sum;
+                    max = data[{idx, idx_to_sum}];
+                }
+            }
+
+        }
+
+    }
+
+    return output;
+
+}
+
+
+Matrix<double> softmax(Matrix<double>& data) {
+
+    Matrix<double> output(data.size());
+
+    for (uint64_t x = 0; x < data.size()[0]; ++x) {
+
+        double max_val = data[{x, 0}];
+        for (uint64_t y = 1; y < data.size()[1]; ++y) {
+            max_val = std::max(max_val, data[{x, y}]);
+        }
+
+        double sum = 0;
+        for (uint64_t y = 0; y < data.size()[1]; ++y) {
+            output[{x, y}] = std::exp(data[{x, y}] - max_val);
+            sum +=  output[{x, y}];
+        }
+
+        for (uint64_t y = 0; y < data.size()[1]; ++y) {
+            output[{x, y}] /= sum;
+        }
+
+    }
 
     return output;
 

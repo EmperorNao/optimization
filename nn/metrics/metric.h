@@ -28,4 +28,14 @@ public:
 };
 
 
+class MultiAccuracy: public Metric {
+
+public:
+    MultiAccuracy(): Metric("MultiAccuracy") {};
+
+    double value(Matrix<double>& answers, Matrix<double>& labels);
+
+};
+
+
 #endif //NN_METRIC_H

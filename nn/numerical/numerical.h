@@ -2,6 +2,7 @@
 #define NN_NUMERICAL_H
 
 #include <functional>
+#include <cmath>
 
 #include "matrix.h"
 
@@ -35,6 +36,14 @@ Matrix<double> transpose(Matrix<double>& data);
 
 
 Matrix<double> mean(Matrix<double>& data, uint64_t axis = 0);
+// count mean by axis
+
+Matrix<double> argmax(Matrix<double>& data, uint64_t axis = 0);
+// count mean by axis
+
+
+Matrix<double> softmax(Matrix<double>& data);
+// count softmax
 
 
 #endif //NN_NUMERICAL_H

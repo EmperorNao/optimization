@@ -39,6 +39,7 @@ public:
 
     }
 
+
     Matrix(std::vector<uint64_t> dims) {
         this->resize(dims);
     }
@@ -49,12 +50,14 @@ public:
 
     Matrix(uint64_t size, T default_value) {
         dimensions.resize(1, size);
+        dimensions_bias.resize(dimensions.size());
         data.resize(size, default_value);
         init_bias();
     }
 
     Matrix(uint64_t size) {
         dimensions.resize(1, size);
+        dimensions_bias.resize(dimensions.size());
         data.resize(size);
         init_bias();
     }

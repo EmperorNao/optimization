@@ -4,3 +4,6 @@
 
 # ignore cmake building
 cmake-build-debug/
+
+# ignore large dataset files
+datasets

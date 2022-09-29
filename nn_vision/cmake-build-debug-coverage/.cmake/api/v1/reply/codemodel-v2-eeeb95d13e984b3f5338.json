@@ -1,0 +1,172 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.23"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "nn",
+					"childIndexes" : 
+					[
+						2
+					],
+					"jsonFile" : "directory-nn-Debug-92fe4805240adba8b87c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.23"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/home/emperornao/projects/optimization/nn",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "nn/utils",
+					"childIndexes" : 
+					[
+						3
+					],
+					"jsonFile" : "directory-nn.utils-Debug-38882e8163e362afdcc5.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.23"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "/home/emperornao/projects/optimization/utils",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "nn/utils/matrix",
+					"jsonFile" : "directory-nn.utils.matrix-Debug-a0e457b0dfddc9918593.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.23"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 2,
+					"source" : "/home/emperornao/projects/optimization/matrix",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						1
+					],
+					"name" : "nn",
+					"targetIndexes" : 
+					[
+						1,
+						2
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "utils",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3
+					],
+					"name" : "matrix",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 3,
+					"id" : "matrix::@12e08c1f719139eb652d",
+					"jsonFile" : "target-matrix-Debug-7d1e3052e0988df7c161.json",
+					"name" : "matrix",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "nn::@b9e682cd265c9dfdad7c",
+					"jsonFile" : "target-nn-Debug-eeb3eaaad9362f3edb73.json",
+					"name" : "nn",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nn_vision::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nn_vision-Debug-b31c1098a9f1a5943009.json",
+					"name" : "nn_vision",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "utils::@40550321b82691b30c5c",
+					"jsonFile" : "target-utils-Debug-a6443c829fa9c9ca4ae1.json",
+					"name" : "utils",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/emperornao/projects/optimization/nn_vision/cmake-build-debug-coverage",
+		"source" : "/home/emperornao/projects/optimization/nn_vision"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

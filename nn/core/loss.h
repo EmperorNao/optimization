@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 
+#include "numerical/numerical.h"
 #include "matrix.h"
 
 
@@ -26,7 +27,7 @@ public:
 class BCELoss: public Loss {
 
 private:
-    double clamp_log(double val, double clamp=-100) {
+    double clamp_log(double val, double clamp=-100000) {
         return std::max(std::log(std::max(val, 1e-8)), clamp);
     }
 
@@ -37,6 +38,24 @@ public:
     double value(Matrix<double>& answers, Matrix<double>& labels);
     Matrix<double> derivative(Matrix<double>& data, Matrix<double>& labels);
     virtual ~BCELoss() {};
+
+};
+
+
+class CELossWithLogits: public Loss {
+
+private:
+    double clamp_log(double val, double clamp=-100) {
+        return std::max(std::log(std::max(val, 1e-8)), clamp);
+    }
+
+public:
+
+    CELossWithLogits(): Loss("CELossWithLogits") {};
+
+    double value(Matrix<double>& answers, Matrix<double>& labels);
+    Matrix<double> derivative(Matrix<double>& data, Matrix<double>& labels);
+    virtual ~CELossWithLogits() {};
 
 };
 

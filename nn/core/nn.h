@@ -9,8 +9,8 @@
 #include "loss.h"
 #include "layer.h"
 #include "functional.h"
-#include "../numerical/numerical.h"
-#include "../optimization/optimization.h"
+#include "numerical/numerical.h"
+#include "optimization/optimization.h"
 
 #include "utils.h"
 

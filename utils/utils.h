@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include "matrix.h"
+
 
 
 std::vector<std::string> split(std::string& s, char delim=',');
@@ -48,6 +50,18 @@ public:
 
     }
 
+    std::vector<uint64_t> random_permutation(uint64_t n) {
+
+        std::vector<uint64_t> obj(n);
+        for (uint64_t i = 0; i < n; ++i) {
+            obj[i] = i;
+        }
+        shuffle(obj);
+        return obj;
+
+    }
+
+
 };
 
 
@@ -76,6 +90,9 @@ public:
     }
 
 };
+
+
+Matrix<double> shuffle_matrix(Matrix<double> matr, std::vector<uint64_t> indexes);
 
 
 

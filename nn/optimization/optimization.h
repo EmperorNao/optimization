@@ -4,9 +4,9 @@
 #include <map>
 
 
-#include "../core/layer.h"
-#include "../core/layer.h"
-#include "../numerical/numerical.h"
+#include "core/layer.h"
+#include "core/layer.h"
+#include "numerical/numerical.h"
 
 
 enum class OPTIMIZATION_ALGO {

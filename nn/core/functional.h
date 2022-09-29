@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <cmath>
 
-#include "../numerical/numerical.h"
+#include "numerical/numerical.h"
+
 
 class Functional {
 
@@ -59,8 +60,6 @@ public:
     Matrix<double> derivative(Matrix<double>& data) { return data; }
     virtual ~Identity() {};
 };
-
-
 
 
 #endif //NN_FUNCTIONAL_H
