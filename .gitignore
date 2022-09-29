@@ -5,5 +5,9 @@
 # ignore cmake building
 cmake-build-debug/
 
+__pycache__
+
+venv
+
 # ignore large dataset files
 datasets
