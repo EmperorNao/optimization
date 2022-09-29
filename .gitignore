@@ -11,3 +11,5 @@ venv
 
 # ignore large dataset files
 datasets
+
+*.bin
